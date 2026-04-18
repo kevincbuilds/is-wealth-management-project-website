@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Builder Game</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(17, 24, 39, 0.88);
+      --panel-2: rgba(30, 41, 59, 0.85);
+      --text: #e5eefc;
+      --muted: #9fb1d1;
+      --accent: #60a5fa;
+      --accent-2: #34d399;
+      --danger: #f87171;
+      --gold: #fbbf24;
+      --border: rgba(148, 163, 184, 0.18);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(52, 211, 153, 0.12), transparent 22%),
+        linear-gradient(160deg, #0b1020 0%, #10182d 45%, #0a1120 100%);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.8));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      bottom: -60px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 165, 250, 0.25), transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero-link {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 14px;
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: var(--shadow);
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .hero-link:hover { transform: translateY(-1px); }
+    .hero-link:active { transform: translateY(1px); }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2.6rem;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      padding: 20px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .allocation-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-field {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .mini-field label {
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .suffix-input {
+      position: relative;
+    }
+
+    .suffix-input input {
+      padding-right: 36px;
+    }
+
+    .suffix {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.92rem;
+      pointer-events: none;
+    }
+
+    label {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(15, 23, 42, 0.88);
+      color: var(--text);
+      outline: none;
+      font-size: 0.98rem;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(96, 165, 250, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(1px); }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), #2563eb);
+      color: white;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+    }
+
+    .secondary {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .asset-info {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.7));
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .asset-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: rgba(96, 165, 250, 0.16);
+      color: #bfdbfe;
+    }
+
+    .asset-info p {
+      margin: 7px 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .main {
+      padding: 20px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 110px;
+    }
+
+    .card-label {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .green { color: var(--accent-2); }
+    .red { color: var(--danger); }
+    .gold { color: var(--gold); }
+
+    .scenario-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid var(--border);
+    }
+
+    .scenario-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid rgba(96, 165, 250, 0.18);
+      color: #dbeafe;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .status-banner {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      background: rgba(52, 211, 153, 0.1);
+      color: #c7f9e8;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .status-banner.invalid {
+      border-color: rgba(248, 113, 113, 0.25);
+      background: rgba(248, 113, 113, 0.1);
+      color: #fecaca;
+    }
+
+    .chart-wrap {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 420px;
+      display: block;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(2, 6, 23, 0.9));
+    }
+
+    .lower-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+    }
+
+    .log, .tips {
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .log-list {
+      max-height: 240px;
+      overflow: auto;
+      display: grid;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    .log-item {
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(30, 41, 59, 0.6);
+      border-radius: 14px;
+      padding: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    .tips ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tiny {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1050px) {
+      .content,
+      .lower-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      .hero, .controls, .main { padding: 16px; }
+      .cards { grid-template-columns: 1fr; }
+      .button-row { grid-template-columns: 1fr; }
+      canvas { height: 320px; }
+      .hero-link {
+        top: 16px;
+        right: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero panel">
+      <a class="hero-link" href="index.html">Back to Home</a>
+      <h1>Market Builder Game</h1>
+      <p class="subtitle">
+        Build a portfolio, choose the market environment, and simulate how steady weekly investing compounds over time.
+        The market path changes every run, so the goal is not to get lucky once. It is to learn how strategy, risk, and consistency interact.
+      </p>
+    </section>
+
+    <section class="content">
+      <aside class="panel controls">
+        <h2 class="section-title">Build Your Strategy</h2>
+        <div class="grid">
+          <div>
+            <label for="asset">Asset Guide</label>
+            <select id="asset"></select>
+          </div>
+
+          <div>
+            <label for="initialInvestment">Starting Investment ($)</label>
+            <input id="initialInvestment" type="number" min="0" step="100" value="5000" />
+          </div>
+
+          <div>
+            <label for="weeklyContribution">Weekly Contribution ($)</label>
+            <input id="weeklyContribution" type="number" min="0" step="10" value="150" />
+          </div>
+
+          <div>
+            <label for="simulationLength">Simulation Length</label>
+            <select id="simulationLength">
+              <option value="1" selected>1 Year</option>
+              <option value="3">3 Years</option>
+              <option value="5">5 Years</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="marketMood">Market Environment</label>
+            <select id="marketMood">
+              <option value="normal" selected>Normal</option>
+              <option value="bull">Bull Market</option>
+              <option value="bear">Bear Market</option>
+              <option value="volatile">High Volatility</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="asset-info">
+          <h3 class="section-title">Portfolio Mix</h3>
+          <div class="allocation-grid">
+            <div class="mini-field">
+              <label for="alloc-usStocks">U.S. Stocks</label>
+              <div class="suffix-input">
+                <input id="alloc-usStocks" type="number" min="0" max="100" step="1" value="40" />
+                <span class="suffix">%</span>
+              </div>
+            </div>
+            <div class="mini-field">
+              <label for="alloc-bonds">Bonds</label>
+              <div class="suffix-input">
+                <input id="alloc-bonds" type="number" min="0" max="100" step="1" value="20" />
+                <span class="suffix">%</span>
+              </div>
+            </div>
+            <div class="mini-field">
+              <label for="alloc-reits">REITs</label>
+              <div class="suffix-input">
+                <input id="alloc-reits" type="number" min="0" max="100" step="1" value="15" />
+                <span class="suffix">%</span>
+              </div>
+            </div>
+            <div class="mini-field">
+              <label for="alloc-commodities">Commodities</label>
+              <div class="suffix-input">
+                <input id="alloc-commodities" type="number" min="0" max="100" step="1" value="5" />
+                <span class="suffix">%</span>
+              </div>
+            </div>
+            <div class="mini-field">
+              <label for="alloc-cash">Cash / T-Bills</label>
+              <div class="suffix-input">
+                <input id="alloc-cash" type="number" min="0" max="100" step="1" value="10" />
+                <span class="suffix">%</span>
+              </div>
+            </div>
+            <div class="mini-field">
+              <label for="alloc-crypto">Crypto</label>
+              <div class="suffix-input">
+                <input id="alloc-crypto" type="number" min="0" max="100" step="1" value="10" />
+                <span class="suffix">%</span>
+              </div>
+            </div>
+          </div>
+          <p class="tiny" id="allocationHint">Your portfolio mix should add up to 100%.</p>
+          <div class="status-banner" id="allocationStatus">Allocation total: 100%. Your portfolio is ready to run.</div>
+        </div>
+
+        <div class="button-row">
+          <button id="runBtn" class="primary">Run Simulation</button>
+          <button id="resetBtn" class="secondary">Reset</button>
+        </div>
+
+        <div class="asset-info" id="assetInfo"></div>
+
+        <p class="tiny">
+          This is a learning game, not financial advice. It is designed to feel believable, but real markets can behave very differently.
+        </p>
+      </aside>
+
+      <main class="panel main">
+        <div class="cards">
+          <div class="card">
+            <div class="card-label">Ending Portfolio Value</div>
+            <div class="card-value" id="endingValue">$0</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Total Contributions</div>
+            <div class="card-value gold" id="totalContributions">$0</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Investment Gain/Loss</div>
+            <div class="card-value" id="investmentGain">$0</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Total Return</div>
+            <div class="card-value" id="totalReturnPct">0.0%</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Best Run</div>
+            <div class="card-value gold" id="bestRun">$0</div>
+          </div>
+        </div>
+
+        <div class="scenario-strip" id="scenarioStrip">
+          <div class="scenario-pill">Asset: U.S. Stocks</div>
+          <div class="scenario-pill">Market: Normal</div>
+          <div class="scenario-pill">Length: 1 Year</div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas id="chart" width="1000" height="420"></canvas>
+        </div>
+
+        <div class="lower-grid">
+          <section class="log">
+            <h3 class="section-title">Simulation Highlights</h3>
+            <div class="log-list" id="logList"></div>
+          </section>
+
+          <section class="tips">
+            <h3 class="section-title">How to Win</h3>
+            <ul>
+              <li>Higher-return assets usually come with bigger swings.</li>
+              <li>Time in the market usually matters more than one perfect entry point.</li>
+              <li>Weekly investing helps smooth out bad weeks.</li>
+              <li>Bonds and cash are steadier, but usually grow more slowly.</li>
+              <li>Crypto can explode upward or fall hard in short periods.</li>
+              <li>The best lesson is consistency, not guessing every week.</li>
+            </ul>
+          </section>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const assets = {
+      usStocks: {
+        name: "U.S. Stocks",
+        annualReturn: 0.09,
+        annualVol: 0.16,
+        description: "Broad stock market exposure. Strong long-term growth potential with normal market ups and downs.",
+        color: "#60a5fa",
+        badge: "Growth",
+        marketBeta: 1,
+      },
+      bonds: {
+        name: "Bonds",
+        annualReturn: 0.04,
+        annualVol: 0.06,
+        description: "More stable than stocks. Lower expected returns, but usually smaller swings.",
+        color: "#34d399",
+        badge: "Income",
+        marketBeta: 0.35,
+      },
+      crypto: {
+        name: "Crypto",
+        annualReturn: 0.16,
+        annualVol: 0.65,
+        description: "Very high risk and very high upside. The wildest asset in the game by far.",
+        color: "#f59e0b",
+        badge: "Speculative",
+        marketBeta: 1.8,
+      },
+      reits: {
+        name: "Real Estate / REITs",
+        annualReturn: 0.07,
+        annualVol: 0.18,
+        description: "Real estate exposure through market-traded funds. Income and growth, with stock-like movement.",
+        color: "#a78bfa",
+        badge: "Real Assets",
+        marketBeta: 0.9,
+      },
+      commodities: {
+        name: "Commodities",
+        annualReturn: 0.05,
+        annualVol: 0.2,
+        description: "Exposure to raw materials like energy, metals, and agriculture. Can be useful, but choppy.",
+        color: "#f97316",
+        badge: "Inflation Hedge",
+        marketBeta: 0.65,
+      },
+      cash: {
+        name: "Cash / T-Bills",
+        annualReturn: 0.025,
+        annualVol: 0.01,
+        description: "Very steady and low risk. Good for stability, but growth is usually modest.",
+        color: "#94a3b8",
+        badge: "Defensive",
+        marketBeta: 0.05,
+      }
+    };
+
+    const moodAdjustments = {
+      normal: { returnShift: 0, volMult: 1, shockChance: 0.04 },
+      bull: { returnShift: 0.04, volMult: 0.95, shockChance: 0.03 },
+      bear: { returnShift: -0.07, volMult: 1.2, shockChance: 0.08 },
+      volatile: { returnShift: 0, volMult: 1.5, shockChance: 0.12 }
+    };
+
+    const assetSelect = document.getElementById("asset");
+    const initialInvestmentInput = document.getElementById("initialInvestment");
+    const weeklyContributionInput = document.getElementById("weeklyContribution");
+    const simulationLengthSelect = document.getElementById("simulationLength");
+    const marketMoodSelect = document.getElementById("marketMood");
+    const assetInfo = document.getElementById("assetInfo");
+    const runBtn = document.getElementById("runBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const logList = document.getElementById("logList");
+    const scenarioStrip = document.getElementById("scenarioStrip");
+    const allocationHint = document.getElementById("allocationHint");
+    const allocationStatus = document.getElementById("allocationStatus");
+
+    const endingValueEl = document.getElementById("endingValue");
+    const totalContributionsEl = document.getElementById("totalContributions");
+    const investmentGainEl = document.getElementById("investmentGain");
+    const totalReturnPctEl = document.getElementById("totalReturnPct");
+    const bestRunEl = document.getElementById("bestRun");
+
+    const canvas = document.getElementById("chart");
+    const ctx = canvas.getContext("2d");
+
+    const allocationKeys = ["usStocks", "bonds", "reits", "commodities", "cash", "crypto"];
+    const allocationInputs = Object.fromEntries(
+      allocationKeys.map(key => [key, document.getElementById(`alloc-${key}`)])
+    );
+
+    let state = {
+      weeks: [],
+      values: [],
+      contributed: [],
+      returns: [],
+      events: [],
+      years: 1,
+      mix: {}
+    };
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatPct(value) {
+      return `${value.toFixed(1)}%`;
+    }
+
+    function populateAssets() {
+      Object.entries(assets).forEach(([key, asset]) => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = asset.name;
+        assetSelect.appendChild(option);
+      });
+      assetSelect.value = "usStocks";
+      renderAssetInfo();
+    }
+
+    function renderAssetInfo() {
+      const asset = assets[assetSelect.value];
+      assetInfo.innerHTML = `
+        <div class="asset-badge">${asset.badge}</div>
+        <p><strong style="color: var(--text)">${asset.name}</strong></p>
+        <p>${asset.description}</p>
+        <p>Expected annual return: <strong style="color: var(--text)">${(asset.annualReturn * 100).toFixed(1)}%</strong></p>
+        <p>Expected volatility: <strong style="color: var(--text)">${(asset.annualVol * 100).toFixed(1)}%</strong></p>
+      `;
+      renderScenarioStrip();
+    }
+
+    function getAllocations() {
+      const raw = {};
+      let total = 0;
+
+      allocationKeys.forEach(key => {
+        const value = Math.max(0, Number(allocationInputs[key].value) || 0);
+        raw[key] = value;
+        total += value;
+      });
+
+      const normalized = {};
+      allocationKeys.forEach(key => {
+        normalized[key] = total > 0 ? raw[key] / total : 0;
+      });
+
+      return {
+        raw,
+        normalized,
+        total,
+        valid: total === 100
+      };
+    }
+
+    function updateAllocationStatus() {
+      const allocationData = getAllocations();
+      const total = allocationData.total;
+      const difference = 100 - total;
+
+      if (allocationData.valid) {
+        allocationStatus.className = "status-banner";
+        allocationStatus.textContent = "Allocation total: 100%. Your portfolio is ready to run.";
+        allocationHint.textContent = "Nice. This mix is balanced correctly and will simulate as entered.";
+      } else {
+        allocationStatus.className = "status-banner invalid";
+        allocationStatus.textContent = `Allocation total: ${total}%. ${difference > 0 ? `Add ${difference}% more.` : `Reduce by ${Math.abs(difference)}%.`}`;
+        allocationHint.textContent = "Tip: keep the total at exactly 100% so your portfolio mix is intentional.";
+      }
+    }
+
+    function renderScenarioStrip() {
+      const moodLabel = marketMoodSelect.options[marketMoodSelect.selectedIndex].text;
+      const years = Number(simulationLengthSelect.value) || 1;
+      const yearLabel = `${years} Year${years > 1 ? "s" : ""}`;
+      const allocationData = getAllocations();
+      const topAssetKey = allocationKeys.reduce((best, key) => {
+        if (!best) return key;
+        return allocationData.raw[key] > allocationData.raw[best] ? key : best;
+      }, "usStocks");
+      const topAsset = assets[topAssetKey];
+
+      scenarioStrip.innerHTML = `
+        <div class="scenario-pill">Lead Holding: ${topAsset.name}</div>
+        <div class="scenario-pill">Market: ${moodLabel}</div>
+        <div class="scenario-pill">Length: ${yearLabel}</div>
+      `;
+    }
+
+    function randomNormal() {
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function simulateYear() {
+      const mood = moodAdjustments[marketMoodSelect.value];
+      const initialInvestment = Math.max(0, Number(initialInvestmentInput.value) || 0);
+      const weeklyContribution = Math.max(0, Number(weeklyContributionInput.value) || 0);
+      const years = Math.max(1, Number(simulationLengthSelect.value) || 1);
+      const totalWeeks = years * 52;
+      const allocationData = getAllocations();
+
+      if (!allocationData.valid) {
+        updateAllocationStatus();
+        logList.innerHTML = "<div class='log-item'>Your allocation mix has to total 100% before the simulation can run.</div>";
+        return;
+      }
+
+      const holdings = {};
+      allocationKeys.forEach(key => {
+        holdings[key] = initialInvestment * allocationData.normalized[key];
+      });
+
+      let portfolio = initialInvestment;
+      let contributed = initialInvestment;
+
+      const weeks = [0];
+      const values = [portfolio];
+      const contributedLine = [contributed];
+      const returns = [0];
+      const events = [];
+
+      for (let week = 1; week <= totalWeeks; week++) {
+        allocationKeys.forEach(key => {
+          holdings[key] += weeklyContribution * allocationData.normalized[key];
+        });
+        contributed += weeklyContribution;
+        const marketShock = Math.random() < mood.shockChance
+          ? (Math.random() < 0.48 ? -1 : 1) * (0.01 + Math.random() * 0.05)
+          : 0;
+
+        let weeklyReturn = 0;
+        let eventText = "";
+        let bestMover = { key: "cash", value: -Infinity };
+        let worstMover = { key: "cash", value: Infinity };
+
+        allocationKeys.forEach(key => {
+          const asset = assets[key];
+          const annualReturn = asset.annualReturn + mood.returnShift;
+          const annualVol = asset.annualVol * mood.volMult;
+          const weeklyDrift = annualReturn / 52;
+          const weeklyVol = annualVol / Math.sqrt(52);
+          const idiosyncraticShockChance = 0.015 + (asset.annualVol * 0.05);
+          const idiosyncraticShock =
+            Math.random() < idiosyncraticShockChance
+              ? (Math.random() < 0.5 ? -1 : 1) * (asset.annualVol * (0.04 + Math.random() * 0.08))
+              : 0;
+
+          const assetReturn = Math.max(
+            weeklyDrift + randomNormal() * weeklyVol + (marketShock * asset.marketBeta) + idiosyncraticShock,
+            -0.85
+          );
+
+          holdings[key] *= (1 + assetReturn);
+          weeklyReturn += assetReturn * allocationData.normalized[key];
+
+          if (assetReturn > bestMover.value) bestMover = { key, value: assetReturn };
+          if (assetReturn < worstMover.value) worstMover = { key, value: assetReturn };
+        });
+
+        portfolio = Object.values(holdings).reduce((sum, value) => sum + value, 0);
+
+        weeks.push(week);
+        values.push(portfolio);
+        contributedLine.push(contributed);
+        returns.push(weeklyReturn);
+
+        if (marketShock !== 0) {
+          eventText = `Week ${week}: A broad market shock hit. ${assets[bestMover.key].name} moved ${formatPct(bestMover.value * 100)}, while ${assets[worstMover.key].name} moved ${formatPct(worstMover.value * 100)}.`;
+        } else if (weeklyReturn >= 0.03) {
+          eventText = `Week ${week}: Strong week. Your mix gained ${formatPct(weeklyReturn * 100)} with ${assets[bestMover.key].name} leading the move.`;
+        } else if (weeklyReturn <= -0.03) {
+          eventText = `Week ${week}: Rough week. Your mix fell ${formatPct(Math.abs(weeklyReturn * 100))}, led lower by ${assets[worstMover.key].name}.`;
+        } else if (week % 13 === 0) {
+          eventText = `Week ${week}: You stayed disciplined and added ${formatMoney(weeklyContribution)}. Portfolio value is now ${formatMoney(portfolio)}.`;
+        }
+
+        if (eventText) events.push({ week, text: eventText });
+      }
+
+      state = { weeks, values, contributed: contributedLine, returns, events, years, mix: allocationData.raw };
+      updateSummary();
+      renderScenarioStrip();
+      drawChart();
+      renderLog();
+    }
+
+    function updateSummary() {
+      const finalValue = state.values[state.values.length - 1] || 0;
+      const totalContributed = state.contributed[state.contributed.length - 1] || 0;
+      const gain = finalValue - totalContributed;
+      const totalReturn = totalContributed > 0 ? (gain / totalContributed) * 100 : 0;
+      const bestRun = Math.max(finalValue, Number(localStorage.getItem("market-builder-best-run") || 0));
+
+      endingValueEl.textContent = formatMoney(finalValue);
+      totalContributionsEl.textContent = formatMoney(totalContributed);
+      investmentGainEl.textContent = `${gain >= 0 ? "+" : "-"}${formatMoney(Math.abs(gain))}`;
+      totalReturnPctEl.textContent = `${totalReturn >= 0 ? "+" : ""}${formatPct(totalReturn)}`;
+      bestRunEl.textContent = formatMoney(bestRun);
+
+      investmentGainEl.className = `card-value ${gain >= 0 ? "green" : "red"}`;
+      totalReturnPctEl.className = `card-value ${totalReturn >= 0 ? "green" : "red"}`;
+      localStorage.setItem("market-builder-best-run", String(bestRun));
+    }
+
+    function drawRoundedRect(x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function drawChart() {
+      const { weeks, values, contributed } = state;
+      const asset = assets[assetSelect.value];
+      const totalWeeks = Math.max(52, state.years * 52);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawRoundedRect(0, 0, canvas.width, canvas.height, 18);
+      const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bg.addColorStop(0, "rgba(15,23,42,1)");
+      bg.addColorStop(1, "rgba(2,6,23,1)");
+      ctx.fillStyle = bg;
+      ctx.fill();
+
+      if (weeks.length <= 1) {
+        ctx.fillStyle = "#9fb1d1";
+        ctx.font = "600 22px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Run the simulation to see your portfolio chart", canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = "16px Inter, sans-serif";
+        ctx.fillText("The blue line is portfolio value. The gray line is money you contributed.", canvas.width / 2, canvas.height / 2 + 24);
+        return;
+      }
+
+      const padding = { top: 35, right: 28, bottom: 48, left: 78 };
+      const chartW = canvas.width - padding.left - padding.right;
+      const chartH = canvas.height - padding.top - padding.bottom;
+      const maxY = Math.max(...values, ...contributed) * 1.08;
+      const minY = Math.min(0, ...values, ...contributed) * 0.98;
+
+      const x = week => padding.left + (week / totalWeeks) * chartW;
+      const y = value => padding.top + (1 - (value - minY) / (maxY - minY || 1)) * chartH;
+
+      ctx.strokeStyle = "rgba(148,163,184,0.18)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const yy = padding.top + (chartH / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, yy);
+        ctx.lineTo(padding.left + chartW, yy);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "#9fb1d1";
+      ctx.font = "12px Inter, sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let i = 0; i <= 5; i++) {
+        const value = maxY - ((maxY - minY) / 5) * i;
+        const yy = padding.top + (chartH / 5) * i;
+        ctx.fillText(formatMoney(value), padding.left - 10, yy);
+      }
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      for (let i = 0; i <= 4; i++) {
+        const week = Math.round((totalWeeks / 4) * i);
+        ctx.fillText(`Wk ${week}`, x(week), padding.top + chartH + 10);
+      }
+      ctx.fillText(`Wk ${totalWeeks}`, x(totalWeeks), padding.top + chartH + 10);
+
+      ctx.beginPath();
+      contributed.forEach((value, index) => {
+        const px = x(weeks[index]);
+        const py = y(value);
+        if (index === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.strokeStyle = "rgba(148,163,184,0.95)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      const areaGradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartH);
+      areaGradient.addColorStop(0, "rgba(96,165,250,0.35)");
+      areaGradient.addColorStop(1, "rgba(96,165,250,0.02)");
+
+      ctx.beginPath();
+      values.forEach((value, index) => {
+        const px = x(weeks[index]);
+        const py = y(value);
+        if (index === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.lineTo(x(totalWeeks), y(minY));
+      ctx.lineTo(x(0), y(minY));
+      ctx.closePath();
+      ctx.fillStyle = areaGradient;
+      ctx.fill();
+
+      ctx.beginPath();
+      values.forEach((value, index) => {
+        const px = x(weeks[index]);
+        const py = y(value);
+        if (index === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.strokeStyle = asset.color;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      const lastX = x(totalWeeks);
+      const lastY = y(values[values.length - 1]);
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = asset.color;
+      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = "13px Inter, sans-serif";
+      ctx.fillStyle = asset.color;
+      ctx.fillRect(padding.left, 14, 14, 4);
+      ctx.fillStyle = "#e5eefc";
+      ctx.fillText("Portfolio Value", padding.left + 22, 16);
+      ctx.fillStyle = "rgba(148,163,184,0.95)";
+      ctx.fillRect(padding.left + 146, 14, 14, 4);
+      ctx.fillStyle = "#e5eefc";
+      ctx.fillText("Total Contributions", padding.left + 168, 16);
+    }
+
+    function renderLog() {
+      logList.innerHTML = "";
+      const events = [...state.events];
+      const finalValue = state.values[state.values.length - 1] || 0;
+      const totalContributed = state.contributed[state.contributed.length - 1] || 0;
+      const gain = finalValue - totalContributed;
+      const years = state.years || 1;
+      const mixSummary = allocationKeys
+        .filter(key => (state.mix[key] || 0) > 0)
+        .sort((a, b) => (state.mix[b] || 0) - (state.mix[a] || 0))
+        .slice(0, 3)
+        .map(key => `${assets[key].name} ${state.mix[key]}%`)
+        .join(", ");
+
+      events.unshift({
+        week: 0,
+        text: `You started with ${formatMoney(Number(initialInvestmentInput.value) || 0)} and added ${formatMoney(Number(weeklyContributionInput.value) || 0)} every week for ${years} year${years > 1 ? "s" : ""}. Core mix: ${mixSummary}.`
+      });
+      events.push({
+        week: years * 52,
+        text: `Simulation complete. You finished with ${formatMoney(finalValue)} on ${formatMoney(totalContributed)} invested, for a ${gain >= 0 ? "gain" : "loss"} of ${formatMoney(Math.abs(gain))}.`
+      });
+
+      events.slice(0, 12).forEach(event => {
+        const item = document.createElement("div");
+        item.className = "log-item";
+        item.textContent = event.text;
+        logList.appendChild(item);
+      });
+    }
+
+    function resetGame() {
+      state = { weeks: [], values: [], contributed: [], returns: [], events: [], years: Number(simulationLengthSelect.value) || 1 };
+      endingValueEl.textContent = "$0";
+      totalContributionsEl.textContent = "$0";
+      investmentGainEl.textContent = "$0";
+      totalReturnPctEl.textContent = "0.0%";
+      bestRunEl.textContent = formatMoney(Number(localStorage.getItem("market-builder-best-run") || 0));
+      investmentGainEl.className = "card-value";
+      totalReturnPctEl.className = "card-value";
+      logList.innerHTML = "<div class='log-item'>Reset complete. Pick an asset class and run a new year.</div>";
+      updateAllocationStatus();
+      renderScenarioStrip();
+      drawChart();
+    }
+
+    assetSelect.addEventListener("change", renderAssetInfo);
+    marketMoodSelect.addEventListener("change", renderScenarioStrip);
+    simulationLengthSelect.addEventListener("change", resetGame);
+    runBtn.addEventListener("click", simulateYear);
+    resetBtn.addEventListener("click", resetGame);
+    Object.values(allocationInputs).forEach(input => {
+      input.addEventListener("input", () => {
+        updateAllocationStatus();
+        renderScenarioStrip();
+      });
+    });
+
+    populateAssets();
+    resetGame();
+  </script>
+</body>
+</html>
